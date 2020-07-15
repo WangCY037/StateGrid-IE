@@ -202,7 +202,7 @@ def re_match_packets(section_contents):
     packets=[]
 
     pattern_1 = '.*需求一览表.*'#([a-zA-Z0-9]+)'   包文件必有 货物需求一览表等内容  其下一行一般是表头 序号 名称 数量
-    pattern_2='.*序号.*'#  
+    pattern_2='.*(序号|名称).*'#  
 
     regex_1 = re.compile(pattern_1)
     regex_2 = re.compile(pattern_2)
@@ -307,6 +307,7 @@ def final_extract(index,packet_index,packet_content,filename,time,parameter_belo
 
     end_index=len(packet_content)
     # 提取类别
+    parameter_type='技术参数'
     for i in range(index,end_index):
         
         text=packet_content[i]
@@ -336,6 +337,8 @@ def final_extract(index,packet_index,packet_content,filename,time,parameter_belo
 
             parameter_name=text[end:]
 
+     
+
             extract_dict = {'parameter_belonging_to':parameter_belonging_to,'parameter_type':parameter_type,'parameter_name': parameter_name,'parameter_value': '', 'time':time,'packet_index':packet_index,'filename':filename}
 
             extract_dict_list.append(extract_dict)
@@ -353,8 +356,10 @@ def final_extract(index,packet_index,packet_content,filename,time,parameter_belo
         elif re.match(pattern_end_1,text) or re.match(pattern_end_2,text):  # 当遇到下一个大标题或者  下一节时  结束
             break
         
-        else:                                                 # 否则 则判断是上一条内容的后继内容，即第二行
-            if extract_dict_list[-1]['parameter_value']:
+        else:
+            if len(extract_dict_list)==0:
+                pass                                               # 否则 则判断是上一条内容的后继内容，即第二行
+            elif extract_dict_list[-1]['parameter_value']:
                 extract_dict_list[-1]['parameter_value']=extract_dict_list[-1]['parameter_value']+text
             else:
                 extract_dict_list[-1]['parameter_name']=extract_dict_list[-1]['parameter_name']+text
